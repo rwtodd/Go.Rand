@@ -29,18 +29,19 @@ func (r *Rand) Uint32() uint32 {
 // Gets a random int32 on the half-open interval
 // [0,n).
 func (r *Rand) Int32n(n int32) int32 {
-	v := r.Uint32()
+	nextNum := r.Uint64()
+	v := uint32(nextNum & 0xFFFFFFFF)
 	prod := uint64(v) * uint64(n)
 	low := uint32(prod)
 	if low < uint32(n) {
 		thresh := uint32(-n) % uint32(n)
 		for low < thresh {
-			nextNum := r.Uint64()
-			v = uint32(nextNum & 0xFFFFFFFF)
+			v = uint32(nextNum >> 32)
 			prod = uint64(v) * uint64(n)
 			low = uint32(prod)
 			if low < thresh {
-				v = uint32(nextNum >> 32)
+				nextNum = r.Uint64()
+				v = uint32(nextNum & 0xFFFFFFFF)
 				prod = uint64(v) * uint64(n)
 				low = uint32(prod)
 			}
